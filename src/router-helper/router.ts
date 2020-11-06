@@ -1,10 +1,10 @@
 import { Constructor, LitElement } from 'lit-element';
-import { CurrentRoute, keyData, resovleWindowRoute } from './router-helper';
+import { CurrentRoute, keyData, resovleWindowRoute, testRoute } from './router-helper';
 
 /**
  * 定义路由导航基础类
  */
-export declare class RouterClass{
+export declare class RouterComponent{
     /**
      * 定义路由规则
      */
@@ -36,34 +36,84 @@ const addEvent = (el: Window|HTMLDocument| Element | SVGAElement, event: string,
 export type RouteDefine={
     name?:string;
     pattern:string;
-    data:keyData;
-    callback?(route:CurrentRoute):void;
-    component?:Constructor<HTMLElement>;
+    component?:Constructor<HTMLElement>|Promise<Constructor<HTMLElement>>;
     children?:RouteDefine[];
     _parent?:RouteDefine;
 }
 export class Router{
     private patterMap=new Map<String,RouteDefine>();
-    private nameMap=new Map<String,RouteDefine>();
     private routers:RouteDefine[];
-    public Router( ...routers: RouteDefine[]){
+    constructor(routers: RouteDefine[]){
         this.routers=routers;
+        routers.forEach((item) => this.addRouter(item));
     }
-    public addRouter(d:RouteDefine){
+    private addRouter(d:RouteDefine){
         this.routers.push(d);
-        const iteratorFun=(p:RouteDefine,sub:RouteDefine) =>{
-            sub._parent=p;
+        const iteratorFun=(parent:RouteDefine,sub:RouteDefine) =>{
+            sub._parent=parent;
             if(sub.children){
-                sub.children.forEach( sub2 => iteratorFun(sub,sub2));
+                sub.children.forEach(sub2 => iteratorFun(sub,sub2));
+            }else{
+                this.cacheRouterPath(sub);
             }
         }  
         if(d.children){
-            d.children.forEach( sub => iteratorFun(d,sub));
-        } 
+            d.children.forEach(sub => iteratorFun(d,sub));
+        }else{
+            this.cacheRouterPath(d);
+        }
+        if(d.pattern=='*'){
+            this.default=d;
+        }
+        if(d.name=='not-found'){
+            this.notFound=d;
+        }
     }
+     default:RouteDefine;
+     notFound:RouteDefine;
+     private pathCache=new Map<string,RouteDefine>();
+
+    private cacheRouterPath(d:RouteDefine){
+        const router=d;
+        let path=d.pattern;
+        const pathArray:string[]=[];
+        if(path){
+            pathArray.splice(0,0,path);
+        }
+        while(d._parent){
+            d=d._parent;
+            if(d.pattern){
+                pathArray.splice(0,0,d.pattern);
+            }
+        }
+        this.pathCache.set(pathArray.join(''),router);
+    }
+
+    public matchRouter(path:string):RouteDefine[]|null{
+        let found:RouteDefine=null;
+        for(let [pattern, route] of this.pathCache){
+            //console.log(pattern,route);
+            if(testRoute(pattern,path)){
+                found=route;
+                break ;
+            }
+        }
+        if(found){  
+            const result:RouteDefine[]=[];
+            result.push(found);
+            while(found._parent){
+                found=found._parent;
+                result.splice(0,0,found);
+            }
+            return result;
+        }
+        return null;
+    }
+    
 }
+
 const cacheRouteDefinde=new WeakMap();
-export function router<TBase extends Constructor<LitElement>>(base:TBase):Constructor<RouterClass> {
+export function router<TBase extends Constructor<LitElement>>(base:TBase):Constructor<RouterComponent> {
     return class extends base{
        private _finalizied=false;
        static  routers:Router;

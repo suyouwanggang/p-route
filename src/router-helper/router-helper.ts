@@ -11,15 +11,15 @@
 
 /**
  * 将  参数字符串变为json 
- * 例如：name=test&password=ajsdsdf ,返回 {name:'test', password:'ajsdsdf'}
+ * 例如：?name=test&password=ajsdsdf ,返回 {name:'test', password:'ajsdsdf'}
  * @param querystring  
  */
  function parseQuery(querystring:string) {
     if(!querystring ){
         return {};
     }
-    if(querystring.startsWith('?')){
-        querystring=querystring.substr(1);
+    if(!querystring.startsWith('?')){
+        querystring='?'+querystring;
     }
         
     return JSON.parse('{"' + querystring.substring(1).replace(/&/g, '","').replace(/=/g, '":"') + '"}') as keyData ;
@@ -108,4 +108,4 @@ function resovleWindowRoute():CurrentRoute{
     param:parseQuery(queryString)
   }
 }
-export {stripExtraTrailingSlash,parseQuery,parseParams,testRoute,resovleWindowRoute};
+export {stripExtraTrailingSlash,parseQuery, toQueryString, parseParams,testRoute,resovleWindowRoute};
