@@ -1,0 +1,72 @@
+{
+	"name": "p-router",
+	"version": "1.0.0",
+	"description": "lit-element 版 view route实现",
+	"repository": "git@github.com:suyouwanggang/p-ui.git",
+	"author": "suyouwanggang",
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "dist/index.js",
+	"module": "dist/index.js",
+	"scripts": {
+		"dev":"rollup -c rollup.config.js --watch",
+		"build": "rm -rf dist && tsc && rollup -c rollup.config.js",
+		"start": "web-dev-server --app-index index.html --node-resolve --open --watch"
+	},
+	"dependencies": {
+		"lit-element": "^2.4.0",
+		"lit-html": "^1.3.0"
+	},
+	"devDependencies": {
+		"@open-wc/building-rollup": "^1.0.0",
+		"@open-wc/demoing-storybook": "^2.0.0",
+		"@open-wc/eslint-config": "^2.0.0",
+		"@open-wc/testing": "^2.0.0",
+		"@types/node": "13.11.1",
+		"@typescript-eslint/eslint-plugin": "^2.20.0",
+		"@typescript-eslint/parser": "^2.20.0",
+		"@web/dev-server": "^0.0.12",
+		"@web/test-runner": "^0.7.41",
+		"concurrently": "^5.1.0",
+		"deepmerge": "^4.2.2",
+		"eslint": "^6.1.0",
+		"eslint-config-prettier": "^6.11.0",
+		"husky": "^1.0.0",
+		"lint-staged": "^10.0.0",
+		"node-sass": "^4.14.1",
+		"prettier": "^2.0.4",
+		"rimraf": "^2.6.3",
+		"rollup": "^2.3.4",
+		"tslib": "^1.11.0",
+		"typescript": "~4.0.3",
+		"uglifycss": "^0.0.29"
+	},
+	"keywords": [
+		"web components router",
+		"lit-element router"
+	],
+	"eslintConfig": {
+		"extends": [
+			"@open-wc/eslint-config",
+			"eslint-config-prettier"
+		]
+	},
+	"prettier": {
+		"singleQuote": true,
+		"arrowParens": "avoid"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.ts": [
+			"eslint --fix",
+			"prettier --write",
+			"git add"
+		]
+	}
+}
